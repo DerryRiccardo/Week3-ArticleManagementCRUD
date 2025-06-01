@@ -1,0 +1,89 @@
+Kategori Utama Status Code HTTP
+Status code dibagi menjadi 5 kategori utama, masing-masing dengan tujuan berbeda:
+
+🔵 1xx — Informational (jarang digunakan di Express)
+Contoh:
+
+100 Continue: Server menerima permintaan awal, lanjutkan.
+
+101 Switching Protocols: Untuk upgrade protokol (jarang di API biasa).
+
+🟢 2xx — Success (permintaan berhasil)
+Code	Nama	Kegunaan
+200	OK	Permintaan berhasil, biasa untuk GET, PUT, PATCH, DELETE
+201	Created	Data berhasil dibuat (digunakan untuk POST)
+202	Accepted	Permintaan diterima tapi belum diproses
+204	No Content	Permintaan berhasil tapi tidak mengembalikan data (biasanya DELETE)
+
+🟡 3xx — Redirection (pengalihan)
+Code	Nama	Kegunaan
+301	Moved Permanently	Arahkan ke URL baru
+302	Found	Redirect sementara
+304	Not Modified	Untuk cache, data belum berubah
+
+🔴 4xx — Client Error (kesalahan dari sisi client)
+Code	Nama	Kegunaan
+400	Bad Request	Data tidak valid atau kurang
+401	Unauthorized	Perlu autentikasi (belum login/token salah)
+403	Forbidden	Akses ditolak, meskipun sudah login
+404	Not Found	Data atau route tidak ditemukan
+405	Method Not Allowed	Metode HTTP (GET/POST/etc.) tidak diizinkan
+422	Unprocessable Entity	Data valid secara format, tapi gagal diproses (misalnya validasi gagal)
+
+🔴 5xx — Server Error (kesalahan dari sisi server)
+Code	Nama	Kegunaan
+500	Internal Server Error	Kesalahan umum di server
+502	Bad Gateway	Server dapat respon buruk dari server lain
+503	Service Unavailable	Server sedang down atau kelebihan beban
+
+
+
+// Step by Step
+npm install prisma
+npx prisma init
+set up env
+buat model di schema.prisma
+npx prisma migrate dev
+buat migration
+buat folder src yang isinya config, controllers, models, routes
+
+
+// Prisma Client Methods
+🔍 QUERY METHODS (Read Data)
+| Method         | Deskripsi                                                                  |
+| -------------- | -------------------------------------------------------------------------- |
+| `findMany()`   | Mengambil banyak data (bisa diberi filter, sorting, limit, dsb).           |
+| `findUnique()` | Mengambil **satu** data berdasarkan kolom yang **unique** (biasanya `id`). |
+| `findFirst()`  | Mengambil satu data pertama yang cocok dengan filter.                      |
+| `count()`      | Menghitung jumlah data berdasarkan filter.                                 |
+| `aggregate()`  | Menghitung nilai statistik (avg, sum, min, max, count, dsb).               |
+| `groupBy()`    | Mengelompokkan data berdasarkan field tertentu.                            |
+
+✍️ CREATE METHODS (Create Data)
+| Method         | Deskripsi                                    |
+| -------------- | -------------------------------------------- |
+| `create()`     | Membuat 1 data baru.                         |
+| `createMany()` | Membuat banyak data sekaligus (bulk insert). |
+
+🔄 UPDATE METHODS (Update Data)
+| Method         | Deskripsi                                            |
+| -------------- | ---------------------------------------------------- |
+| `update()`     | Mengupdate satu data berdasarkan `where`.            |
+| `updateMany()` | Mengupdate banyak data sekaligus berdasarkan filter. |
+| `upsert()`     | Jika data ada → update, jika tidak ada → create.     |
+
+❌ DELETE METHODS (Delete Data)
+| Method         | Deskripsi                                 |
+| -------------- | ----------------------------------------- |
+| `delete()`     | Menghapus satu data berdasarkan `where`.  |
+| `deleteMany()` | Menghapus banyak data berdasarkan filter. |
+
+🧠 LAINNYA (Advanced)
+| Method          | Deskripsi                                        |
+| --------------- | ------------------------------------------------ |
+| `include`       | Menyertakan relasi (mirip JOIN) saat query.      |
+| `select`        | Memilih hanya kolom tertentu untuk dikembalikan. |
+| `orderBy`       | Mengurutkan hasil query.                         |
+| `where`         | Menentukan kondisi pencarian/filter.             |
+| `take` & `skip` | Untuk pagination (ambil X data, lewati Y data).  |
+| `distinct`      | Mengambil data unik berdasarkan field tertentu.  |
