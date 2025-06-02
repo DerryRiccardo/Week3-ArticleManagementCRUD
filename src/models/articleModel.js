@@ -24,10 +24,6 @@ class ArticleModel {
 	static async create(data) {
 		const { title, content, author } = data;
 
-		if (!title || !content || !author) {
-			throw new Error("Title, content, and author are required");
-		}
-
 		return await prisma.article.create({
 			data: { title, content, author },
 		});

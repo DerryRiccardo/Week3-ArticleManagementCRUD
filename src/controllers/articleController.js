@@ -1,4 +1,5 @@
 import ArticleModel from "../models/articleModel.js";
+import Joi from "joi";
 
 class ArticleController {
 	static async getAllPublishedArticles(req, res) {
@@ -40,21 +41,16 @@ class ArticleController {
 	}
 
 	static async createArticle(req, res) {
+		const scheme = Joi.object({
+			title: Joi.string().required(),
+			content: Joi.string().required(),
+			author: Joi.string().required(),
+		});
+
 		try {
-			const { title, content, author } = req.body;
-
-			if (!title || !content || !author) {
-				return res.status(400).json({
-					success: false,
-					message: "Title, content, and author are required",
-				});
-			}
-
-			const article = await ArticleModel.create({
-				title,
-				content,
-				author,
-			});
+			await scheme.validateAsync(req.body);
+			
+			const article = await ArticleModel.create(req.body);
 
 			res.status(201).json({
 				success: true,
@@ -62,6 +58,13 @@ class ArticleController {
 				data: article,
 			});
 		} catch (err) {
+			if (err.isJoi) {
+				return res.status(400).json({
+					success: false,
+					message: "Title, content, and author are required",
+				});
+			}
+
 			res.status(400).json({
 				success: false,
 				message: "Failed to create article",
@@ -71,11 +74,17 @@ class ArticleController {
 	}
 
 	static async updateArticle(req, res) {
-		try {
-			const { id } = req.params;
-			const data = req.body;
+		const scheme = Joi.object({
+			title: Joi.string().optional(),
+			content: Joi.string().optional(),
+			author: Joi.string().optional(),
+			published: Joi.boolean().optional(),
+		});
 
-			const article = await ArticleModel.update(id, data);
+		try {
+			await scheme.validateAsync(req.body);
+
+			const article = await ArticleModel.update(req.params.id, req.body);
 
 			res.status(200).json({
 				success: true,
@@ -83,6 +92,13 @@ class ArticleController {
 				data: article,
 			});
 		} catch (err) {
+			if (err.isJoi) {
+				return res.status(400).json({
+					success: false,
+					message: "Invalid data format",
+				});
+			}
+
 			const status = err.message === "Article not found" ? 404 : 400;
 			res.status(status).json({
 				success: false,
@@ -94,9 +110,7 @@ class ArticleController {
 
 	static async deleteArticle(req, res) {
 		try {
-			const { id } = req.params;
-
-			await ArticleModel.delete(id);
+			await ArticleModel.delete(req.params.id);
 
 			res.status(200).json({
 				success: true,
@@ -114,9 +128,7 @@ class ArticleController {
 
 	static async publishArticle(req, res) {
 		try {
-			const { id } = req.params;
-
-			const article = await ArticleModel.publish(id);
+			const article = await ArticleModel.publish(req.params.id);
 
 			res.status(200).json({
 				success: true,
