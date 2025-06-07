@@ -1,6 +1,6 @@
 import prisma from "../config/database.js";
 
-class ArticleModel {
+class ArticleRepository {
 	static async getAllPublished() {
 		return await prisma.article.findMany({
 			where: {
@@ -22,20 +22,12 @@ class ArticleModel {
 	}
 
 	static async create(data) {
-		const { title, content, author } = data;
-
 		return await prisma.article.create({
-			data: { title, content, author },
+			data,
 		});
 	}
 
 	static async update(id, data) {
-		const existingArticle = await ArticleModel.getById(id);
-
-		if (!existingArticle) {
-			throw new Error("Article not found");
-		}
-
 		return await prisma.article.update({
 			where: {
 				id: parseInt(id),
@@ -45,32 +37,9 @@ class ArticleModel {
 	}
 
 	static async delete(id) {
-		const existingArticle = await ArticleModel.getById(id);
-
-		if (!existingArticle) {
-			throw new Error("Article not found");
-		}
-
 		return await prisma.article.delete({
 			where: {
 				id: parseInt(id),
-			},
-		});
-	}
-
-	static async publish(id) {
-		const existingArticle = await ArticleModel.getById(id);
-
-		if (!existingArticle) {
-			throw new Error("Article not found");
-		}
-
-		return await prisma.article.update({
-			where: {
-				id: parseInt(id),
-			},
-			data: {
-				published: true,
 			},
 		});
 	}
@@ -86,4 +55,4 @@ class ArticleModel {
 	}
 }
 
-export default ArticleModel;
+export default ArticleRepository;

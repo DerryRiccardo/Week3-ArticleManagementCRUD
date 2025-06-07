@@ -1,16 +1,16 @@
-import ArticleModel from "../models/articleModel.js";
+import ArticleService from "../services/articleService.js";
 import Joi from "joi";
 
 class ArticleController {
 	static async getAllPublishedArticles(req, res) {
 		try {
-			const article = await ArticleModel.getAllPublished();
+			const articles = await ArticleService.getAllPublished();
 
 			res.status(200).json({
 				success: true,
 				message: "Published articles retrieved successfully",
-				data: article,
-				count: article.length,
+				data: articles,
+				count: articles.length,
 			});
 		} catch (err) {
 			res.status(500).json({
@@ -23,13 +23,13 @@ class ArticleController {
 
 	static async getAllArticles(req, res) {
 		try {
-			const article = await ArticleModel.getAll();
+			const articles = await ArticleService.getAllArticles();
 
 			res.status(200).json({
 				success: true,
 				message: "All articles retrieved successfully",
-				data: article,
-				count: article.length,
+				data: articles,
+				count: articles.length,
 			});
 		} catch (err) {
 			res.status(500).json({
@@ -41,16 +41,17 @@ class ArticleController {
 	}
 
 	static async createArticle(req, res) {
-		const scheme = Joi.object({
+		// Validate request body
+		const schema = Joi.object({
 			title: Joi.string().required(),
 			content: Joi.string().required(),
 			author: Joi.string().required(),
 		});
 
 		try {
-			await scheme.validateAsync(req.body);
-			
-			const article = await ArticleModel.create(req.body);
+			await schema.validateAsync(req.body);
+
+			const article = await ArticleService.createArticle(req.body);
 
 			res.status(201).json({
 				success: true,
@@ -74,7 +75,8 @@ class ArticleController {
 	}
 
 	static async updateArticle(req, res) {
-		const scheme = Joi.object({
+		// Validate request body
+		const schema = Joi.object({
 			title: Joi.string().optional(),
 			content: Joi.string().optional(),
 			author: Joi.string().optional(),
@@ -82,9 +84,12 @@ class ArticleController {
 		});
 
 		try {
-			await scheme.validateAsync(req.body);
+			await schema.validateAsync(req.body);
 
-			const article = await ArticleModel.update(req.params.id, req.body);
+			const article = await ArticleService.updateArticle(
+				req.params.id,
+				req.body
+			);
 
 			res.status(200).json({
 				success: true,
@@ -110,7 +115,7 @@ class ArticleController {
 
 	static async deleteArticle(req, res) {
 		try {
-			await ArticleModel.delete(req.params.id);
+			await ArticleService.deleteArticle(req.params.id);
 
 			res.status(200).json({
 				success: true,
@@ -128,7 +133,7 @@ class ArticleController {
 
 	static async publishArticle(req, res) {
 		try {
-			const article = await ArticleModel.publish(req.params.id);
+			const article = await ArticleService.publishArticle(req.params.id);
 
 			res.status(200).json({
 				success: true,
@@ -149,26 +154,26 @@ class ArticleController {
 		try {
 			const { q } = req.query;
 
-			if (!q) {
-				return res.status(400).json({
-					success: false,
-					message: "Search query is required",
-				});
-			}
-
-			const article = await ArticleModel.searchByTitle(q);
+			const articles = await ArticleService.searchArticleByTitle(q);
 
 			res.status(200).json({
 				success: true,
 				message:
-					article.length > 0
+					articles.length > 0
 						? "Search completed successfully"
 						: "No articles found matching your search",
-				data: article,
+				data: articles,
 				query: q,
-				count: article.length,
+				count: articles.length,
 			});
 		} catch (err) {
+			if (err.message === "Search query is required") {
+				return res.status(400).json({
+					success: false,
+					message: err.message,
+				});
+			}
+
 			res.status(500).json({
 				success: false,
 				message: "Search failed",
